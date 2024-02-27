@@ -42,17 +42,17 @@ ZONE_ID_2 = 'your_zone_2_id'
 DOMAINS_TO_UPDATE = [
     {
         'zone_id': ZONE_ID_1,
-        'domain': 'subdomain1.mgedev.com',
+        'domain': 'subdomain1.example.com',
         'proxied': True
     },
     {
         'zone_id': ZONE_ID_1,
-        'domain': 'subdomain2.mgedev.com',
+        'domain': 'subdomain2.example.com',
         'proxied': False
     },
     {
         'zone_id': ZONE_ID_2,
-        'domain': 'subdomain1.mgesoftware.com',
+        'domain': 'subdomain.example.org',
         'proxied': True
     }
 ]

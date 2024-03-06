@@ -1,0 +1,7 @@
+[
+    {
+        "zone_id": "$CF_ZONE_ID",
+        "name": "subdomain1.example.com",
+        "proxied": true
+    }
+]

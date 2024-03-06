@@ -51,7 +51,7 @@ def create_logger(level=logging.INFO):
     console_handler.setLevel(level)
     file_handler.setLevel(logging.WARNING)
 
-    # Create formatters and add it :w:wto handlers
+    # Create formatters and add it to handlers
     logger_format = logging.Formatter('%(asctime)s | %(filename)s | %(levelname)s | %(message)s')
     file_format = logging.Formatter('%(asctime)s | %(filename)s(%(lineno)d) | %(levelname)s | %(message)s')
 

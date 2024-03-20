@@ -1,0 +1,13 @@
+{
+    "zones": [
+        {
+            "id": "$CF_ZONE_ID",
+            "domains":
+            [
+                {
+                    "name": "example.tuxhub.cloud"
+                }
+            ]
+        }
+    ]
+}

@@ -32,25 +32,26 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Edit the `update_dns.py` script and replace the placeholders for `API_KEY`, `EMAIL`, and the `DOMAINS_TO_UPDATE` list with your actual data.
+Edit the `main.py` script and replace the placeholders for `API_TOKEN`, `ZONE_ID_1`, `ZONE_ID_2` (or however many zones you have), and the `DOMAINS_TO_UPDATE` list with your actual data.
 
 Example configuration:
 ```
-API_KEY = 'your_cloudflare_api_key'
-EMAIL = 'your_email'
+API_TOKEN = 'your_cloudflare_api_token'
+ZONE_ID_1 = 'your_zone_1_id'
+ZONE_ID_2 = 'your_zone_2_id'
 DOMAINS_TO_UPDATE = [
     {
-        'zone_id': 'zone_id_1',
+        'zone_id': ZONE_ID_1,
         'domain': 'subdomain1.example.com',
         'proxied': True
     },
     {
-        'zone_id': 'zone_id_1',
+        'zone_id': ZONE_ID_1,
         'domain': 'subdomain2.example.com',
         'proxied': False
     },
     {
-        'zone_id': 'zone_id_2',
+        'zone_id': ZONE_ID_2,
         'domain': 'subdomain.example.org',
         'proxied': True
     }
@@ -61,7 +62,7 @@ DOMAINS_TO_UPDATE = [
 Run the script:
 
 ```
-python update_dns.py
+python main.py
 ```
 
 ## Docker Deployment
@@ -79,6 +80,23 @@ docker run -d --name dns-updater --restart unless-stopped dns-updater
 This will run the container in detached mode and ensure it starts automatically when the server restarts, unless you explicitly stop it.
 
 ## Tutorial
-[Here](https://blog.devgenius.io/dns-updater-a-solution-for-managing-dynamic-ips-with-cloudflare-31be2f85d9fb) is a guide that shows you how to get the API Keys on cloudflare and how to set up this tool.
+### 🔑 How to create and get an API Token from Cloudflare
+1. Log in to your Cloudflare account.
+2. Navigate to your profile settings by clicking on your account icon in the top right corner of the dashboard.
+3. Navigate to the “API Tokens” link from the left side menu.
+4. Click the Create Token under User API Tokens.
+5. Under Templates use the Edit zone DNS template.
+6. Rename the token to your liking and change the Zone resources to Include All zones.
+7. Continue to summary and then Create token
+8. Copy the token shown. This is your API_TOKEN.
+9. ⚠️ ***THIS TOKEN WILL BE SHOWN ONLY ONCE. DO NOT FORGET TO SAVE IT!*** ⚠️
+
+### 🌍 Obtaining the Zone ID
+To obtain the Zone ID for your domain from Cloudflare, follow these steps:
+1. Log in to your Cloudflare account.
+2. Select the domain you want to manage from the list of domains in your dashboard.
+3. On the domain’s overview page, you will find the Zone ID displayed in the right-hand sidebar under the “API” section. This is your Zone ID for your domain.
+
+[Here](https://blog.devgenius.io/dns-updater-a-solution-for-managing-dynamic-ips-with-cloudflare-31be2f85d9fb) is a guide that shows you how to set up this tool.
 
 https://blog.devgenius.io/dns-updater-a-solution-for-managing-dynamic-ips-with-cloudflare-31be2f85d9fb

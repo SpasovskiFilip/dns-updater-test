@@ -20,8 +20,9 @@ import logging
 import sys
 
 # Replace with your actual data
-API_KEY = 'your_cloudflare_api_key'
-EMAIL = 'your_email'
+API_TOKEN = 'your_cloudflare_api_token'
+ZONE_ID_1 = 'your_zone_1_id'
+ZONE_ID_2 = 'your_zone_2_id'
 
 # Define API endpoints
 BASE_URL = 'https://api.cloudflare.com/client/v4/'
@@ -37,17 +38,17 @@ IP_CHECK_SERVICES = [
 # List of zones and domains to update
 DOMAINS_TO_UPDATE = [
     {
-        'zone_id': 'zone_id_1',
+        'zone_id': ZONE_ID_1,
         'domain': 'subdomain1.mgedev.com',
         'proxied': True
     },
     {
-        'zone_id': 'zone_id_1',
+        'zone_id': ZONE_ID_1,
         'domain': 'subdomain2.mgedev.com',
         'proxied': False
     },
     {
-        'zone_id': 'zone_id_2',
+        'zone_id': ZONE_ID_2,
         'domain': 'subdomain1.mgesoftware.com',
         'proxied': True
     }
@@ -85,8 +86,7 @@ LOGGER = create_logger()
 # Get current DNS record for the specified domain
 def get_dns_record(zone_id, domain_name):
     headers = {
-        'X-Auth-Email': EMAIL,
-        'X-Auth-Key': API_KEY,
+        'Authorization': 'Bearer ' + API_TOKEN,
         'Content-Type': 'application/json',
     }
 
@@ -106,8 +106,7 @@ def get_dns_record(zone_id, domain_name):
 # Update the DNS record
 def update_dns_record(record_id, zone_id, name, record_type, content, ttl=120, proxied=True):
     headers = {
-        'X-Auth-Email': EMAIL,
-        'X-Auth-Key': API_KEY,
+        'Authorization': 'Bearer ' + API_TOKEN,
         'Content-Type': 'application/json',
     }
 

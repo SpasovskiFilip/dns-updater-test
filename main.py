@@ -22,8 +22,7 @@ import os
 import json
 
 # Replace with your actual data
-CF_API_KEY = os.getenv("CF_API_KEY")
-CF_EMAIL = os.getenv("CF_EMAIL")
+CF_API_TOKEN = os.getenv("CF_API_TOKEN")
 CF_ZONE_ID = os.getenv("CF_ZONE_ID")
 DNS_RECORD_COMMENT_KEY = os.getenv('DNS_RECORD_COMMENT_KEY')
 DOMAINS_FILE_PATH = os.getenv('DOMAINS_FILE_PATH')
@@ -73,8 +72,7 @@ def get_dns_record(zone_id, domain_name):
     LOGGER.info(f"Fetching record for '{domain_name}' in zone '{zone_id}.")
 
     headers = {
-        'X-Auth-Email': CF_EMAIL,
-        'X-Auth-Key': CF_API_KEY,
+        'Authorization': 'Bearer ' + CF_API_TOKEN,
         'Content-Type': 'application/json',
     }
 
@@ -99,8 +97,7 @@ def get_dns_record(zone_id, domain_name):
 # Update the DNS record
 def update_dns_record(record, content):
     headers = {
-        'X-Auth-Email': CF_EMAIL,
-        'X-Auth-Key': CF_API_KEY,
+        'Authorization': 'Bearer ' + CF_API_TOKEN,
         'Content-Type': 'application/json',
     }
 
@@ -158,8 +155,7 @@ def get_dns_records_by_name(zones):
 # Fetches all DNS records that contain the comment key inside of the comment
 def get_dns_records_by_comment(zone_id, comment_key):
     headers = {
-        'X-Auth-Email': CF_EMAIL,
-        'X-Auth-Key': CF_API_KEY,
+        'Authorization': 'Bearer ' + CF_API_TOKEN,
         'Content-Type': 'application/json',
     }
 
@@ -216,11 +212,8 @@ def check_and_update_dns():
     if CF_ZONE_ID is None:
         LOGGER.error("CF_ZONE_ID: At least one zone id must be set.")
         return
-    elif CF_EMAIL is None:
-        LOGGER.error("CF_EMAIL Missing: You have to provide your Cloudflare email.")
-        return
-    elif CF_API_KEY is None:
-        LOGGER.error("CF_API_KEY Missing: You have to provide your Cloudflare API Key.")
+    elif CF_API_TOKEN is None:
+        LOGGER.error("CF_API_TOKEN Missing: You have to provide your Cloudflare API Token.")
         return
     elif DNS_RECORD_COMMENT_KEY is None and DOMAINS_FILE_PATH is None:
         LOGGER.error("DNS_RECORD_COMMENT_KEY and DOMAINS_FILE_PATH are missing, don't know which domains to update")

@@ -23,7 +23,6 @@ import json
 
 # Replace with your actual data
 CF_API_TOKEN = os.getenv("CF_API_TOKEN")
-CF_EMAIL = os.getenv("CF_EMAIL")
 CF_ZONE_ID = os.getenv("CF_ZONE_ID")
 DNS_RECORD_COMMENT_KEY = os.getenv('DNS_RECORD_COMMENT_KEY')
 DOMAINS_FILE_PATH = os.getenv('DOMAINS_FILE_PATH')

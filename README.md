@@ -32,30 +32,51 @@ pip install -r requirements.txt
 
 ## Configuration
 
-Edit the `main.py` script and replace the placeholders for `API_TOKEN`, `ZONE_ID_1`, `ZONE_ID_2` (or however many zones you have), and the `DOMAINS_TO_UPDATE` list with your actual data.
+Edit the `.env` file and replace the placeholders for `CF_API_TOKEN`, `CF_ZONE_ID`, `DNS_RECORD_COMMENT_KEY`, and the `domains.json` list with your actual data.
 
-Example configuration:
+
+Example configuration for `domains.json`:
 ```
-API_TOKEN = 'your_cloudflare_api_token'
-ZONE_ID_1 = 'your_zone_1_id'
-ZONE_ID_2 = 'your_zone_2_id'
-DOMAINS_TO_UPDATE = [
-    {
-        'zone_id': ZONE_ID_1,
-        'domain': 'subdomain1.example.com',
-        'proxied': True
-    },
-    {
-        'zone_id': ZONE_ID_1,
-        'domain': 'subdomain2.example.com',
-        'proxied': False
-    },
-    {
-        'zone_id': ZONE_ID_2,
-        'domain': 'subdomain.example.org',
-        'proxied': True
-    }
-]
+{
+    "zones": [
+        {
+            "id": "$CF_ZONE_ID1",
+            "domains":
+            [
+                {
+                    "name": "example1.tuxhub.cloud"
+                },
+                {
+                    "name": "example2.tuxhub.cloud"
+                }
+
+            ]
+        },
+        {
+            "id": "$CF_ZONE_ID2",
+            "domains":
+            [
+                {
+                    "name": "sub1.hubtux.cloud"
+                },
+                {
+                    "name": "sub2.hubtux.cloud"
+                }
+
+            ]
+        }
+    ]
+}
+```
+Example configuration for `.env`:
+```
+CF_API_TOKEN=your_account_api_token
+CF_ZONE_ID=your_cf_zone_id
+CF_ZONE_ID1=your_cf_zone_id_1
+CF_ZONE_ID1=your_cf_zone_id_2
+DNS_RECORD_COMMENT_KEY=your_record_comment
+DOMAINS_FILE_PATH=.\domains.json
+SCHEDULE_MINUTES=60
 ```
 
 ## Usage
@@ -75,6 +96,10 @@ docker build -t dns-updater .
 Run the Docker container:
 ```
 docker run -d --name dns-updater --restart unless-stopped dns-updater
+```
+Optional - Run the Docker container with binding the `main.py` file, but replace the `/path/to/local/` with the actual path to your local `main.py` file:
+```
+docker run -d --name dns-updater -v /path/to/local/main.py:/app/main.py --restart unless-stopped dns-updater
 ```
 
 This will run the container in detached mode and ensure it starts automatically when the server restarts, unless you explicitly stop it.
@@ -96,6 +121,7 @@ To obtain the Zone ID for your domain from Cloudflare, follow these steps:
 1. Log in to your Cloudflare account.
 2. Select the domain you want to manage from the list of domains in your dashboard.
 3. On the domain’s overview page, you will find the Zone ID displayed in the right-hand sidebar under the “API” section. This is your Zone ID for your domain.
+4. [OPTIONAL] If you have multiple zones, repeat steps 1-3 for each zone.
 
 [Here](https://blog.devgenius.io/dns-updater-a-solution-for-managing-dynamic-ips-with-cloudflare-31be2f85d9fb) is a guide that shows you how to set up this tool.
 

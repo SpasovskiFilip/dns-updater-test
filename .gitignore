@@ -3,3 +3,4 @@ domains.json
 dns_updater.log
 domains.json
 scripts/*
+.vscode/

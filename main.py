@@ -11,6 +11,7 @@ to the correct server. It can handle multiple domains and subdomains from multip
 zones, with proxying enabled or disabled. The tool runs checks and updates every
 5 minutes and includes redundancy for IP checking services.
 """
+# pylint: disable=line-too-long
 
 import time
 import socket
@@ -67,8 +68,8 @@ def create_logger(level=logging.INFO):
 LOGGER = create_logger()
 
 
-# Get current DNS record for the specified domain
 def get_dns_record(zone_id, domain_name):
+    """ Get current DNS record for the specified domain """
     LOGGER.info("Fetching record for '%s' in zone '%s'.", domain_name, zone_id)
 
     headers = {
@@ -94,8 +95,8 @@ def get_dns_record(zone_id, domain_name):
     return None
 
 
-# Update the DNS record
 def update_dns_record(record, content):
+    """ Update the DNS record """
     headers = {
         'Authorization': 'Bearer ' + CF_API_TOKEN,
         'Content-Type': 'application/json',
@@ -118,8 +119,8 @@ def update_dns_record(record, content):
         LOGGER.error("Failed to update DNS record: %s", response.json())
 
 
-# Loads static wishlist of domains in json format along with their metadata
 def read_zones_from_file(json_file_path, zone_id):
+    """ Loads static wishlist of domains in json format along with their metadata """
     with open(json_file_path, 'r', encoding="utf-8") as file:
         data = json.load(file)
 
@@ -137,8 +138,8 @@ def read_zones_from_file(json_file_path, zone_id):
     return zones
 
 
-# Fetches all DNS records that were loaded from file
 def get_dns_records_by_name(zones):
+    """ Fetches all DNS records that were loaded from file """
     records = []
 
     LOGGER.info("Trying to fetch records for %s zones.", len(zones))
@@ -173,14 +174,14 @@ def get_dns_records_by_comment(zone_id, comment_key):
             return records
         LOGGER.warning("Request was successful but no valid domains were found: %s", response.json())
         return []
-    
+
     LOGGER.error("Failed to get dns_records with comment key: %s", response.json())
 
     return []
 
 
-# Get public IP address from the list of IP checking services
 def get_public_ip():
+    """ Get public IP address from the list of IP checking services """
     for service in IP_CHECK_SERVICES:
         try:
             response = requests.get(service, timeout=5)
@@ -191,8 +192,8 @@ def get_public_ip():
     return None
 
 
-# Check if there is an active internet connection
 def is_connected():
+    """ Check if there is an active internet connection """
     try:
         host = socket.gethostbyname("www.cloudflare.com")
         socket.create_connection((host, 80), 2)
@@ -201,8 +202,8 @@ def is_connected():
         LOGGER.error("Socket error: %s", exc)
     return False
 
-# Function to run the check and update process
 def check_and_update_dns():
+    """ Function to run the check and update process """
     LOGGER.info("Run triggered by schedule.")
 
     if not is_connected():

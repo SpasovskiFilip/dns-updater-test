@@ -12,14 +12,14 @@ zones, with proxying enabled or disabled. The tool runs checks and updates every
 5 minutes and includes redundancy for IP checking services.
 """
 
-import requests
-import schedule
 import time
 import socket
 import logging
 import sys
 import os
 import json
+import requests
+import schedule
 
 # Replace with your actual data
 CF_API_TOKEN = os.getenv("CF_API_TOKEN")

@@ -154,8 +154,8 @@ def get_dns_records_by_name(zones):
     return records
 
 
-# Fetches all DNS records that contain the comment key inside of the comment
 def get_dns_records_by_comment(zone_id, comment_key):
+    """ Fetches all DNS records that contain the comment key inside of the comment """
     headers = {
         'Authorization': 'Bearer ' + CF_API_TOKEN,
         'Content-Type': 'application/json',

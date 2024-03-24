@@ -26,7 +26,7 @@ CF_API_TOKEN = os.getenv("CF_API_TOKEN")
 CF_ZONE_ID = os.getenv("CF_ZONE_ID")
 DNS_RECORD_COMMENT_KEY = os.getenv('DNS_RECORD_COMMENT_KEY')
 DOMAINS_FILE_PATH = os.getenv('DOMAINS_FILE_PATH')
-SCHEDULE_MINUTES = int(os.getenv('SCHEDULE_MINUTES', 60))
+SCHEDULE_MINUTES = int(os.getenv('SCHEDULE_MINUTES', '60'))
 
 # Define API endpoints
 BASE_URL = 'https://api.cloudflare.com/client/v4/'
@@ -69,7 +69,7 @@ LOGGER = create_logger()
 
 # Get current DNS record for the specified domain
 def get_dns_record(zone_id, domain_name):
-    LOGGER.info(f"Fetching record for '{domain_name}' in zone '{zone_id}.")
+    LOGGER.info(f"Fetching record for '%s' in zone '%s'.", domain_name, zone_id)
 
     headers = {
         'Authorization': 'Bearer ' + CF_API_TOKEN,
@@ -80,16 +80,16 @@ def get_dns_record(zone_id, domain_name):
         'name': domain_name,
     }
 
-    response = requests.get(f'{BASE_URL}zones/{zone_id}/dns_records', headers=headers, params=params)
+    response = requests.get(f'{BASE_URL}zones/{zone_id}/dns_records', headers=headers, params=params, timeout=60)
 
     if response.status_code == 200:
         records = response.json()['result']
 
         if records:
-            LOGGER.info(f"Successfully fetched data for '{domain_name}'.")
+            LOGGER.info(f"Successfully fetched data for '%s'.", domain_name)
             return records[0]
     else:
-        LOGGER.error(f"Failed to fetch data for '{domain_name}'. Response: {response.json()}")
+        LOGGER.error(f"Failed to fetch data for '%s'. Response: %s", domain_name, response.json())
 
     return None
 
@@ -108,18 +108,19 @@ def update_dns_record(record, content):
     response = requests.patch(
                 f"{BASE_URL}zones/{record['zone_id']}/dns_records/{record['id']}",
                 json=data,
-                headers=headers
+                headers=headers,
+                timeout=30
             )
 
     if response.status_code == 200:
-        LOGGER.info(f"DNS record updated successfully: {record['name']} ({record['type']}) -> {content}")
+        LOGGER.info(f"DNS record updated successfully: %s (%s) -> %s", record['name'], record['type'], content)
     else:
-        LOGGER.error(f"Failed to update DNS record: {response.json()}")
+        LOGGER.error(f"Failed to update DNS record: %s", response.json())
 
 
 # Loads static wishlist of domains in json format along with their metadata
 def read_zones_from_file(json_file_path, zone_id):
-    with open(json_file_path, 'r') as file:
+    with open(json_file_path, 'r', encoding="utf-8") as file:
         data = json.load(file)
 
     zones = data['zones']
@@ -131,7 +132,7 @@ def read_zones_from_file(json_file_path, zone_id):
         for domain in zone['domains']:
             domain['zone_id'] = zone['id']
 
-        LOGGER.info(f"Sucessfully read zone {zone}.")
+        LOGGER.info(f"Sucessfully read zone %s.", zone)
 
     return zones
 
@@ -140,7 +141,7 @@ def read_zones_from_file(json_file_path, zone_id):
 def get_dns_records_by_name(zones):
     records = []
 
-    LOGGER.info(f"Trying to fetch records for {len(zones)} zones.")
+    LOGGER.info(f"Trying to fetch records for %s zones.", len(zones))
 
     for zone in zones:
         for domain in zone['domains']:
@@ -163,18 +164,17 @@ def get_dns_records_by_comment(zone_id, comment_key):
         'comment.contains': comment_key,
     }
 
-    LOGGER.info(f"Fetching DNS record with comment key: {comment_key}")
-    response = requests.get(f'{BASE_URL}zones/{zone_id}/dns_records', headers=headers, params=params)
+    LOGGER.info(f"Fetching DNS record with comment key: %s", comment_key)
+    response = requests.get(f'{BASE_URL}zones/{zone_id}/dns_records', headers=headers, params=params, timeout=60)
 
     if response.status_code == 200:
         records = response.json()['result']
         if records and len(records) > 0:
             return records
-        else:
-            LOGGER.warning(f"Request was successful but no valid domains were found: {response.json()}")
-            return []
+        LOGGER.warning(f"Request was successful but no valid domains were found: %s", response.json())
+        return []
     else:
-        LOGGER.error(f"Failed to get dns_records with comment key: {response.json()}")
+        LOGGER.error(f"Failed to get dns_records with comment key: %s", response.json())
 
     return []
 
@@ -197,7 +197,8 @@ def is_connected():
         host = socket.gethostbyname("www.cloudflare.com")
         socket.create_connection((host, 80), 2)
         return True
-    except Exception:
+    except socket.error as exc:
+        LOGGER.error("Socket error: %s", exc)
         pass
     return False
 
@@ -212,10 +213,10 @@ def check_and_update_dns():
     if CF_ZONE_ID is None:
         LOGGER.error("CF_ZONE_ID: At least one zone id must be set.")
         return
-    elif CF_API_TOKEN is None:
+    if CF_API_TOKEN is None:
         LOGGER.error("CF_API_TOKEN Missing: You have to provide your Cloudflare API Token.")
         return
-    elif DNS_RECORD_COMMENT_KEY is None and DOMAINS_FILE_PATH is None:
+    if DNS_RECORD_COMMENT_KEY is None and DOMAINS_FILE_PATH is None:
         LOGGER.error("DNS_RECORD_COMMENT_KEY and DOMAINS_FILE_PATH are missing, don't know which domains to update")
         return
 
@@ -223,21 +224,21 @@ def check_and_update_dns():
     domain_records = []
 
     if DNS_RECORD_COMMENT_KEY is not None:
-        LOGGER.info(f"Using DNS_RECORD_COMMENT_KEY='{DNS_RECORD_COMMENT_KEY}' to find DNS records to update.")
+        LOGGER.info(f"Using DNS_RECORD_COMMENT_KEY='%s' to find DNS records to update.", DNS_RECORD_COMMENT_KEY)
         domain_records = get_dns_records_by_comment(CF_ZONE_ID, DNS_RECORD_COMMENT_KEY)
     else:
-        LOGGER.info(f"Using DOMAINS_FILE_PATH='{DOMAINS_FILE_PATH}' to find DNS records to update.")
+        LOGGER.info(f"Using DOMAINS_FILE_PATH='%s' to find DNS records to update.", DOMAINS_FILE_PATH)
         domain_records = get_dns_records_by_name(read_zones_from_file(DOMAINS_FILE_PATH, CF_ZONE_ID))
 
     valid_domains = [x['name'] for x in domain_records if x is not None]
-    LOGGER.info(f"Found {len(valid_domains)} valid domains for update: [{','.join(valid_domains)}]")
+    LOGGER.info(f"Found %s valid domains for update: [%s]", len(valid_domains), ','.join(valid_domains))
 
     if public_ip:
         for record in domain_records:
             domain_name = record['name']
 
             if record is None:
-                LOGGER.error(f"DNS record for {domain_name} not found.")
+                LOGGER.error(f"DNS record for %s not found.", domain_name)
                 continue
 
             if public_ip != record['content']:
@@ -246,12 +247,12 @@ def check_and_update_dns():
                     public_ip
                 )
             else:
-                LOGGER.info(f"IP addresses are the same for {domain_name}. No update needed.")
+                LOGGER.info(f"IP addresses are the same for %s. No update needed.", domain_name)
     else:
         LOGGER.error("Failed to retrieve public IP. Skipping check and update.")
 
 
-LOGGER.info(f"Schedule is set at {SCHEDULE_MINUTES}")
+LOGGER.info(f"Schedule is set at %s minutes", SCHEDULE_MINUTES)
 
 # Schedule the check and update process to run every X minutes
 schedule.every(SCHEDULE_MINUTES).minutes.do(check_and_update_dns).run()
